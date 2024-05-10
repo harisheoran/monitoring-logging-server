@@ -1,0 +1,32 @@
+---
+- name: Update System
+  become: true
+  apt:
+    upgrade: true
+    update_cache: true
+- name: Add Docker's official GPG key
+  ansible.builtin.shell:
+    cmd: |
+      sudo apt-get update
+      sudo apt-get install -y ca-certificates curl
+      sudo install -m 0755 -d /etc/apt/keyrings
+      sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+- name: Add the repository to Apt sources
+  ansible.builtin.shell:
+    cmd: |
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt-get update
+
+- name: Install Docker
+  ansible.builtin.shell: sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+- name: Enable & start the Docker
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Add current user to docker group
+  ansible.builtin.shell: sudo usermod -aG docker $USER

@@ -1,0 +1,6 @@
+---
+- name: Set up monitoring and logging
+  hosts: monitor-log-host
+  become: true
+  roles:
+    - monitor-log-server
